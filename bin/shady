@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require "shady"
+
+trap("INT" ) { abort "\n" }
+trap("PIPE") { abort "\n" } rescue nil
+
+opts = {}
+
+OptionParser.new.instance_eval do
+  @version = "0.1.1"
+  @banner  = "usage: #{program_name} [options] [file]"
+
+  on "-a", "--attrs", "Honor attributes and namespaces (default)"
+  on "-x", "--xml"  , "Input is XML"
+
+  Kernel.abort to_s if ARGV.empty?
+  self
+end.parse!(into: opts) rescue abort($!.message)
+
+opts.transform_keys!(&:to_s) # stringify keys
+
+atts = opts["attrs"] || true
+is_x = opts["xml"  ]
+
+puts ARGF.read.xml_to_slim if is_x

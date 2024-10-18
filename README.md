@@ -1,2 +1,2 @@
 # shady
-A Ruby library to work with Slim, XML, and hashes
+A Ruby gem to work with Slim, XML, and hashes
