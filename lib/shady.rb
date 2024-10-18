@@ -8,6 +8,7 @@
 # ==============================================================================
 
 require "bindings"
+require "json"
 require "nokogiri"
 require "slim"
 
@@ -162,6 +163,29 @@ module Slim
   end
 end
 
+def hash_to_xml_builder(xml, hash)
+  hash.each do |key, value|
+    case value
+    when Hash
+      xml.send(key) { hash_to_xml_builder(xml, value) }
+    when Array
+      value.each do |v|
+        xml.send(key) do
+          v.is_a?(Hash) ? hash_to_xml_builder(xml, v) : xml.text(v)
+        end
+      end
+    else
+      xml.send(key, value)
+    end
+  end
+end
+
+def hash_to_xml(hash, root='root')
+  Nokogiri::XML::Builder.new do |xml|
+    xml.send(root) { hash_to_xml_builder(xml, hash) }
+  end.to_xml
+end
+
 class String
   def slim(scope=nil)
     Slim::Template.new(pretty: true, strip: true, format: :xml) { self }.result
@@ -178,6 +202,16 @@ class String
   def xml_to_xml
     Nokogiri.XML(self) {|o| o.default_xml.noblanks}.to_xml(indent:2) rescue self
   end
+
+  def json_to_xml(root='root')
+    hash = JSON.parse(self)
+    hash_to_xml(hash)
+  end
+
+  def json_to_slim(root='root')
+    json_to_xml(root).xml_to_slim
+  end
+
 end
 
 def slim(str="")

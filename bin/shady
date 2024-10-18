@@ -9,7 +9,7 @@ trap("PIPE") { abort "\n" } rescue nil
 opts = {}
 
 OptionParser.new.instance_eval do
-  @version = "0.1.1"
+  @version = "0.2.0"
   @banner  = "usage: #{program_name} [options] [file]"
 
   on "-a", "--attrs", "Honor attributes and namespaces (default)"
